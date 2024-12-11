@@ -17,7 +17,7 @@ The problem that I am trying to solve is when streaming data in real time that i
 ### What am I trying to build:
 I am trying to build an ingest-transform-load streaming pipeline for baseball player statistics by extracting the data from the official MLB website, ingesting it with Amazon Kinesis, transform with Glue, and load to Amazon Redshift Data warehouse.
 
-![text](Architecture_picture.jpg)
+![text](ITL-architect.jpg)
 
 ### What do you plan to demonstrate in demo:
 I am taking statistics of 3 LA dodger baseball players, Shohei Ohtani, Betts Mookie, and Freddie Freeman, in the duration of 3 months and making a simulation of streaming of the data from the csv in the S3 bucket. Then, I will use lambda to stream each record to the Kinesis Data Streaming. After ingestion, the data will be transformed in Glue by selecting only the important statistics. After that, data will be loaded into a warehouse, Amazon redshift. 
