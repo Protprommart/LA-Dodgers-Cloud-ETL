@@ -1,0 +1,55 @@
+import boto3
+import csv
+import json
+import os
+
+
+# Initialize the Kinesis client
+kinesis_client = boto3.client('kinesis')
+
+
+def lambda_handler(event, context):
+    try:
+        # Get S3 bucket and object key from the event
+        bucket_name = event['Records'][0]['s3']['bucket']['name']
+        object_key = event['Records'][0]['s3']['object']['key']
+        print(f"Bucket: {bucket_name}, Key: {object_key}")
+
+
+        # Download the file from S3
+        s3_client = boto3.client('s3')
+        response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+        data = response['Body'].read().decode('utf-8-sig').splitlines()
+
+
+        # Parse the CSV file
+        reader = csv.DictReader(data)
+
+
+        # Stream records to Kinesis
+        for row in reader:
+            #skip row for no player and print it out for audit
+            if not row['Player']:
+                print(f"Skipping empty row: {row}")
+                continue
+
+
+            # Convert each row to JSON
+            record = json.dumps(row)
+            print(f"Sending record: {record}")
+
+
+            # Send record to Kinesis Data Stream
+            partition_key = row['Player']
+            kinesis_client.put_record(
+                StreamName='baseball-stream',
+                Data=record,
+                PartitionKey=partition_key
+            )
+        #verify stream complete
+        print("Streaming to Kinesis completed.")
+
+
+    #stream fail and reason for failing
+    except Exception as e:
+        print(f"Streaming to Kinesis failed: {str(e)}")
